@@ -8,6 +8,7 @@ import {
   Tag,
   FileText,
   BarChart3,
+  Upload,
   LogOut
 } from 'lucide-react';
 

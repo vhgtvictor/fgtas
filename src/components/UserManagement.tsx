@@ -11,66 +11,11 @@ interface User {
 
 export default function UserManagement() {
   const [users, setUsers] = useState<User[]>([
-    { id: 1, name: 'João Silva', email: 'joao@empresa.com', role: 'Administrador', status: 'Ativo' },
-    { id: 2, name: 'Maria Santos', email: 'maria@empresa.com', role: 'Usuário', status: 'Ativo' },
+    { id: 1, name: 'admin', email: 'admin@admin.com', role: 'Administrador', status: 'Ativo' },
+    { id: 2, name: 'funcionario', email: 'funcionario@empresa.com', role: 'Usuário', status: 'Ativo' },
   ]);
   const [showModal, setShowModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [editingItem, setEditingItem] = useState<User | null>(null);
-  const [formData, setFormData] = useState({
-    id: 0,
-    name: '',
-    email: '',
-    role: '',
-    status: 'Ativo',
-  });
-
-  const handleAddNew = () => {
-    setEditingItem(null);
-    setFormData({
-      id: 0,
-      name: '',
-      email: '',
-      role: '',
-      status: 'Ativo',
-    });
-    setShowModal(true);
-  };
-
-  const handleEdit = (user: User) => {
-    setEditingItem(user);
-    setFormData(user);
-    setShowModal(true);
-  };
-
-  const handleSave = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (formData.id) {
-      setUsers(users.map((u) => (u.id === formData.id ? formData : u)));
-    } else {
-      const newUser = { ...formData, id: Math.max(...users.map((u) => u.id), 0) + 1 };
-      setUsers([...users, newUser]);
-    }
-    setShowModal(false);
-    setFormData({
-      id: 0,
-      name: '',
-      email: '',
-      role: '',
-      status: 'Ativo',
-    });
-  };
-
-  const handleDelete = (id: number) => {
-    if (window.confirm('Tem certeza que deseja deletar este usuário?')) {
-      setUsers(users.filter((u) => u.id !== id));
-    }
-  };
-
-  const filteredUsers = users.filter((user) =>
-    user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.email.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
   return (
     <div className="max-w-7xl mx-auto">
@@ -78,7 +23,7 @@ export default function UserManagement() {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <h2 className="text-2xl font-bold text-gray-900">Gerenciamento de Usuários</h2>
           <button
-            onClick={handleAddNew}
+            onClick={() => setShowModal(true)}
             className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
           >
             <Plus className="w-5 h-5" />
@@ -121,7 +66,7 @@ export default function UserManagement() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredUsers.map((user) => (
+              {users.map((user) => (
                 <tr key={user.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                     {user.name}
@@ -138,16 +83,10 @@ export default function UserManagement() {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <button 
-                      onClick={() => handleEdit(user)}
-                      className="text-blue-600 hover:text-blue-900 mr-3"
-                    >
+                    <button className="text-blue-600 hover:text-blue-900 mr-3">
                       <Edit className="w-4 h-4" />
                     </button>
-                    <button 
-                      onClick={() => handleDelete(user.id)}
-                      className="text-red-600 hover:text-red-900"
-                    >
+                    <button className="text-red-600 hover:text-red-900">
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </td>
@@ -161,21 +100,16 @@ export default function UserManagement() {
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg max-w-md w-full p-6">
-            <h3 className="text-xl font-bold text-gray-900 mb-4">
-              {editingItem ? 'Editar' : 'Novo'} Usuário
-            </h3>
-            <form onSubmit={handleSave} className="space-y-4">
+            <h3 className="text-xl font-bold text-gray-900 mb-4">Novo Usuário</h3>
+            <form className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Nome Completo
                 </label>
                 <input
                   type="text"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                   placeholder="Nome do usuário"
-                  required
                 />
               </div>
               <div>
@@ -184,28 +118,30 @@ export default function UserManagement() {
                 </label>
                 <input
                   type="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                   placeholder="email@empresa.com"
-                  required
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Perfil
                 </label>
-                <select 
-                  value={formData.role}
-                  onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                  required
-                >
+                <select className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none">
                   <option value="">Selecione um perfil</option>
-                  <option value="Administrador">Administrador</option>
-                  <option value="Usuário">Usuário</option>
-                  <option value="Visualizador">Visualizador</option>
+                  <option value="admin">Administrador</option>
+                  <option value="user">Usuário</option>
+                  <option value="viewer">Visualizador</option>
                 </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Senha
+                </label>
+                <input
+                  type="password"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                  placeholder="••••••••"
+                />
               </div>
               <div className="flex gap-3 mt-6">
                 <button
@@ -219,7 +155,7 @@ export default function UserManagement() {
                   type="submit"
                   className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
                 >
-                  {editingItem ? 'Atualizar' : 'Salvar'} Usuário
+                  Salvar
                 </button>
               </div>
             </form>

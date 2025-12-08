@@ -1,74 +1,84 @@
-import { useState } from 'react';
-import CRUDTemplate from './CRUDTemplate';
-
-interface BaseFisica {
-  id: number;
-  nome: string;
-  cidade: string;
-  estado: string;
-  endereco: string;
-}
+import { useEffect, useState } from "react";
+import CRUDTemplate from "./CRUDTemplate";
 
 export default function BasesFisicas() {
-  const [bases, setBases] = useState<BaseFisica[]>([
-    { id: 1, nome: 'Matriz São Paulo', cidade: 'São Paulo', estado: 'SP', endereco: 'Av. Paulista, 1000' },
-    { id: 2, nome: 'Filial Rio de Janeiro', cidade: 'Rio de Janeiro', estado: 'RJ', endereco: 'Av. Atlântica, 500' },
-  ]);
+  const [bases, setBases] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [editingItem, setEditingItem] = useState<BaseFisica | null>(null);
+  const [editing, setEditing] = useState(null);
+
+  const loadData = async () => {
+    const res = await fetch("http://localhost:3000/api/bases-fisicas");
+    const data = await res.json();
+    setBases(data);
+  };
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const handleSubmit = async (formData) => {
+    if (editing) {
+      await fetch(`http://localhost:3000/api/bases-fisicas/${editing.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+    } else {
+      await fetch("http://localhost:3000/api/bases-fisicas", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+    }
+
+    setShowModal(false);
+    setEditing(null);
+    loadData();
+  };
+
+  const handleDelete = async (id) => {
+    await fetch(`http://localhost:3000/api/bases-fisicas/${id}`, {
+      method: "DELETE",
+    });
+    loadData();
+  };
 
   const columns = [
-    { key: 'nome', label: 'Nome' },
-    { key: 'cidade', label: 'Cidade' },
-    { key: 'estado', label: 'Estado' },
-    { key: 'endereco', label: 'Endereço' },
+    { key: "nome", label: "Nome" },
+    { key: "cidade", label: "Cidade" },
+    { key: "estado", label: "Estado" },
+    { key: "endereco", label: "Endereço" },
   ];
 
   const formFields = [
-    { key: 'nome', label: 'Nome da Base', type: 'text' },
-    { key: 'cidade', label: 'Cidade', type: 'text' },
-    { key: 'estado', label: 'Estado', type: 'text' },
-    { key: 'endereco', label: 'Endereço', type: 'text' },
+    { key: "nome", label: "Nome", type: "text" },
+    { key: "cidade", label: "Cidade", type: "text" },
+    { key: "estado", label: "Estado", type: "text" },
+    { key: "endereco", label: "Endereço", type: "text" },
   ];
-
-  const handleAdd = () => {
-    setEditingItem(null);
-    setShowModal(true);
-  };
-
-  const handleEdit = (item: BaseFisica) => {
-    setEditingItem(item);
-    setShowModal(true);
-  };
-
-  const handleSave = (item: any) => {
-    if (item.id) {
-      setBases(bases.map((b) => (b.id === item.id ? item : b)));
-    } else {
-      const newItem = { ...item, id: Math.max(...bases.map((b) => b.id), 0) + 1 };
-      setBases([...bases, newItem]);
-    }
-  };
-
-  const handleDelete = (id: number) => {
-    if (window.confirm('Tem certeza que deseja deletar esta base física?')) {
-      setBases(bases.filter((b) => b.id !== id));
-    }
-  };
 
   return (
     <CRUDTemplate
       title="Bases Físicas"
       columns={columns}
       items={bases}
-      onAdd={handleAdd}
-      onEdit={handleEdit}
-      onDelete={handleDelete}
-      onSave={handleSave}
       formFields={formFields}
       showModal={showModal}
-      onCloseModal={() => setShowModal(false)}
-      editingItem={editingItem}
+      editing={editing}
+      onAdd={() => {
+        setEditing(null);
+        setShowModal(true);
+      }}
+      onEdit={(item) => {
+        setEditing(item);
+        setShowModal(true);
+      }}
+      onDelete={handleDelete}
+      onCloseModal={() => {
+        setShowModal(false);
+        setEditing(null);
+      }}
+      onSubmit={handleSubmit}
     />
   );
 }

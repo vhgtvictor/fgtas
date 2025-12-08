@@ -18,7 +18,8 @@ export default function Login({ onLoginSuccess }: LoginProps) {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-8">
         <div className="flex justify-center mb-6">
-          <div className="bg-blue-600 p-3 rounded-full">
+          <div>
+            <img src="/src/imagens/FGTAS.jpg" alt="Logo FGTAS"></img>
             <LogIn className="w-8 h-8 text-white" />
           </div>
         </div>
